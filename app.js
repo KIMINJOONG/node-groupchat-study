@@ -12,7 +12,9 @@ const fs = require('fs');
 const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
 const { default: axios } = require('axios');
+require('dotenv').config()
 
+const api = process.env.PRODUCTION ? process.env.REAL_API : process.env.DEV_API;
 // 파일업로드를 위한 multer 설정
 const upload = multer({
     storage: multer.diskStorage({
@@ -49,7 +51,7 @@ app.post('/messages/fileUpload', upload.array('files'), async(req, res) => {
             message: '파일업로드',
             srcs,
         }
-        axios.post(`http://localhost:8000/api/messages/${req.body.chatRoomSeq}`, data, {headers}).then((response) => {
+        axios.post(`${api}/api/messages/${req.body.chatRoomSeq}`, data, {headers}).then((response) => {
             return res.json(response.data);
         }).catch((error) => console.log('error : ', error));
 
@@ -87,7 +89,7 @@ io.on('connection', socket => {
     socket.on('joinRoom', ({chatRoomSeq, token}) => {
         socket.token = token;
         socket.chatRoomSeq = chatRoomSeq;
-        axios.get(`http://127.0.0.1:8000/api/chatRooms/${chatRoomSeq}/getUsers`).then((response) => {
+        axios.get(`${api}/api/chatRooms/${chatRoomSeq}/getUsers`).then((response) => {
             console.log(typeof chatRoomSeq);
             socket.join("19");
             if(response.status === 200) {
@@ -95,11 +97,11 @@ io.on('connection', socket => {
                     const headers = {
                         'Authorization' : `Bearer ${token}`
                     };
-                    axios.get(`http://127.0.0.1:8000/api/chatRooms/${chatRoomSeq}/getMessages`, {headers}).then((getMessagesResponse) => {
+                    axios.get(`${api}/api/chatRooms/${chatRoomSeq}/getMessages`, {headers}).then((getMessagesResponse) => {
                         if(getMessagesResponse.status === 200) {
                             if(getMessagesResponse.data) {
                                 socket.emit('getMessagesHistory', {data: getMessagesResponse.data});
-                                axios.post(`http://localhost:8000/api/chatRooms/${chatRoomSeq}/connect`, {}, {headers}).then((response) => {
+                                axios.post(`${api}/api/chatRooms/${chatRoomSeq}/connect`, {}, {headers}).then((response) => {
                                 });
                             }
                         }
@@ -121,7 +123,7 @@ io.on('connection', socket => {
         const headers = {
             'Authorization' : `Bearer ${token}`
         };
-        axios.post(`http://localhost:8000/api/messages/${chatRoomSeq}`, {message}, {headers}).then((response) => {
+        axios.post(`${api}/api/messages/${chatRoomSeq}`, {message}, {headers}).then((response) => {
             if(response.status === 200) {
                 io.to("19").emit('message', response.data);
             }
@@ -133,7 +135,7 @@ io.on('connection', socket => {
             const headers = {
                 'Authorization' : `Bearer ${socket.token}`
             };
-            axios.post(`http://localhost:8000/api/chatRooms/${socket.chatRoomSeq}/disconnect`,{}, {headers}).then((response) => {
+            axios.post(`${api}/api/chatRooms/${socket.chatRoomSeq}/disconnect`,{}, {headers}).then((response) => {
 
             }).catch((error) => {
                 console.log('error :', error);
@@ -152,7 +154,7 @@ io.on('connection', socket => {
             const headers = {
                 'Authorization' : `Bearer ${socket.token}`
             };
-            axios.post(`http://localhost:8000/api/chatRooms/${chatRoomSeq}/inviteFriends`, {userSeqs}, {headers}).then((response) => {
+            axios.post(`${api}/api/chatRooms/${chatRoomSeq}/inviteFriends`, {userSeqs}, {headers}).then((response) => {
                 if(response.status === 200) {
                     if(response.data) {
                         io.to(chatRoomSeq).emit('invitedFriends',response.data);

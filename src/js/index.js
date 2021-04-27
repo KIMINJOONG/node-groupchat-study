@@ -7,7 +7,7 @@ function login() {
         email: emailInput.value,
         password: passwordInput.value,
     };
-    axios.post('http://localhost:8000/api/auth/login', data).then((response) => {
+    axios.post(`${api}/api/auth/login`, data).then((response) => {
         if(response.status === 200) {
             if(response.data.access_token) {
                 localStorage.setItem('token', response.data.access_token);
