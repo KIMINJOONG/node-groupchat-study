@@ -31,7 +31,7 @@ const upload = multer({
 });
 
 const io = socketIo(server);
-io.adapter(redisAdapter({ host: '218.38.52.223', port: 6379 }));
+io.adapter(redisAdapter({ host: process.env.REDIS_SERVER, port: 6379 }));
 
 app.use(express.urlencoded({extended: false}));
 app.use(express.json());
