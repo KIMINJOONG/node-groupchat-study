@@ -26,8 +26,8 @@ const openModal = () => {
     const headers = {
         'Authorization' : `Bearer ${token}`
     };
-    axios.get(`${api}/api/auth/me`, {headers}).then((response) => {
-        axios.get(`${api}/api/users`, {headers}).then((usersResponse) => {
+    axios.get('http://127.0.0.1:8000/api/auth/me', {headers}).then((response) => {
+        axios.get('http://127.0.0.1:8000/api/users', {headers}).then((usersResponse) => {
             
             if(usersResponse.status === 200) {
                 if(usersResponse.data) {

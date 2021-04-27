@@ -5,7 +5,7 @@ window.onload = function() {
     const headers = {
         'Authorization' : `Bearer ${token}`
     };
-    axios.get(`${api}/api/auth/me`, {headers}).then((response) => {
+    axios.get('http://127.0.0.1:8000/api/auth/me', {headers}).then((response) => {
         const nameInput = document.getElementById('userName');
         const userSeqInput = document.getElementById('userSeq');
         if(response.status === 200) {
@@ -15,7 +15,7 @@ window.onload = function() {
                 nameInput.value = user.name;
             }
 
-            axios.get(`${api}/api/auth/me/getChatRooms`, {headers}).then((chatRoomsResponse) => {
+            axios.get('http://127.0.0.1:8000/api/auth/me/getChatRooms', {headers}).then((chatRoomsResponse) => {
                 const roomList = document.getElementById('roomList');
                 if(chatRoomsResponse.status === 200) {
                     if(chatRoomsResponse.data) {
@@ -28,7 +28,7 @@ window.onload = function() {
                 }
             });
 
-            axios.get(`${api}/api/users`, {headers}).then((usersResponse) => {
+            axios.get('http://127.0.0.1:8000/api/users', {headers}).then((usersResponse) => {
                 const userList = document.getElementById('userList');
                 if(usersResponse.status === 200) {
                     if(usersResponse.data) {
@@ -56,7 +56,7 @@ function createChatRoom(userSeq) {
     const data = {
         userSeqs: [userSeq]
     };
-    axios.post(`${api}/api/chatRooms`, data, {headers}).then((response) => {
+    axios.post('http://127.0.0.1:8000/api/chatRooms', data, {headers}).then((response) => {
         if(response.status === 200) {
             if(response.data) {
                 window.location.href = `/chat.html?chatRoomSeq=${response.data.seq}`;
