@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+			integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk="
+			crossorigin="anonymous"
+		/>
+		<link rel="stylesheet" href="css/style.css" />
+		<title>ChatCord App</title>
+	</head>
+	<body>
+		<div class="join-container">
+			<header class="join-header">
+				<h1><i class="fas fa-smile"></i> ChatCord</h1>
+			</header>
+			<main class="join-main">
+				<div class="form-control">
+					<label for="username">접속자</label>
+					<input
+						type="text"
+						name="userName"
+						id="userName"
+						value=""
+						disabled
+						placeholder="Enter username..."
+						required
+					/>
+					<input
+						id="userSeq"
+						type="text"
+						hidden
+						value=""
+					/>
+				</div>
+				<div class="form-control">
+					<label for="roomList">채팅방 리스트</label>
+					<ul id="roomList" name="roomList" style="width: 100%">
+					</ul>
+				</div>
+				<div class="form-control">
+					<label for="room">리스트</label>
+					<ul id="userList" name="room" style="width: 100%">
+					</ul>
+				</div>
+			</main>
+		</div>
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script type="text/javascript" src="js/chatList.js"></script>
+	</body>
+</html>

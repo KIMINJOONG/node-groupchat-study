@@ -16,7 +16,11 @@
     <div class="chat-container">
       <header class="chat-header">
         <h1><i class="fas fa-smile"></i> ChatCord</h1>
-        <a id="leave-btn" class="btn">Leave Room</a>
+        <div class="chat-header-button-container">
+          <button id="invite-friend-btn" class="btn">친구초대</button>
+          <a id="leave-btn" class="btn">Leave Room</a>
+        </div>
+        
       </header>
       <main class="chat-main">
         <div class="chat-sidebar">
@@ -36,8 +40,22 @@
             required
             autocomplete="off"
           />
+          <input type="file" id="fileUploadInput" style="display: none;">
+          <label for="fileUploadInput" class="fileUploadBtn btn" style="margin-right: 0.5rem; display: flex; justify-content: center; align-items: center;"><i class="fas fa-paper-plane"></i>FileUpload</label>
           <button class="btn"><i class="fas fa-paper-plane"></i> Send</button>
         </form>
+      </div>
+    </div>
+
+
+
+    <div class="modal hidden">
+      <div class="md_overlay"></div>
+      <div class="md_content">
+        <h1>친구 초대</h1>
+        <ul id="userList" name="userList" style="width: 100%">
+        </ul>
+        <button class="invite-friend-btn" onclick="inviteFriends();">초대하기</button>
       </div>
     </div>
 
@@ -46,6 +64,7 @@
       integrity="sha256-TDxXjkAUay70ae/QJBEpGKkpVslXaHHayklIVglFRT4="
       crossorigin="anonymous"
     ></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="js/chat.js"></script>
   </body>
