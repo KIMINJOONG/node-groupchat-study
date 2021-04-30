@@ -102,13 +102,23 @@ function createChatRoom(userSeq) {
     const data = {
         userSeqs: [userSeq]
     };
-    axios.post(`${apiUrl}/chatRooms`, data, {headers}).then((response) => {
-        if(response.status === 200) {
-            if(response.data) {
-                window.location.href = `/chat.html?chatRoomSeq=${response.data.seq}`;
+
+    axios.get('/apiUrl').then((apiUrlResponse) => {
+        if(apiUrlResponse.status === 200) {
+            if(apiUrlResponse.data) {
+                const apiUrl = apiUrlResponse.data.url;
+                
+                axios.post(`${apiUrl}/chatRooms`, data, {headers}).then((response) => {
+                    if(response.status === 200) {
+                        if(response.data) {
+                            window.location.href = `/chat.html?chatRoomSeq=${response.data.seq}`;
+                        }
+                    }
+                });
             }
         }
-    });
+    }).catch(error => console.log(error));
+    
 }
 
 function enterChatRoom(chatRoomSeq) {
