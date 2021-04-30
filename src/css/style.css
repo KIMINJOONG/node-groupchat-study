@@ -125,6 +125,27 @@ a {
 
 .chat-form-container form {
   display: flex;
+  flex-direction: column;
+}
+
+.fileUploadBtn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+@media screen and (min-width: 769px) {
+  .chat-form-container form {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .fileUploadBtn {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
 }
 
 .chat-form-container input[type="text"] {
