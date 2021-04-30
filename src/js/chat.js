@@ -105,7 +105,6 @@ socket.on('message', message => {
 });
 
 socket.on('showUploadFiles', data => {
-    console.log('showUploadFiles', data);
     const div = document.createElement('div');
     div.classList.add('message');
     div.innerHTML = `

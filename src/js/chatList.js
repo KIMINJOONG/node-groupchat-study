@@ -74,7 +74,6 @@ socket.on('invitedFriend-createRoom', data => {
                 axios.get(`${apiUrl}/auth/me`, {headers}).then((response) => {
                     if(response.status === 200) {
                         const me = response.data.current_user;
-                        console.log(data);
                         for(let invited of data.invited) {
                             if(me.seq === invited.seq) {
                                 const chatRoom = data.invitedRoomInfo;
@@ -96,28 +95,19 @@ socket.on('invitedFriend-createRoom', data => {
 
 function createChatRoom(userSeq) {
     const token = localStorage.getItem('token');
-    const headers = {
-        'Authorization' : `Bearer ${token}`
-    };
+    
     const data = {
-        userSeqs: [userSeq]
+        userSeqs: [userSeq],
+        token
     };
 
-    axios.get('/apiUrl').then((apiUrlResponse) => {
-        if(apiUrlResponse.status === 200) {
-            if(apiUrlResponse.data) {
-                const apiUrl = apiUrlResponse.data.url;
-                
-                axios.post(`${apiUrl}/chatRooms`, data, {headers}).then((response) => {
-                    if(response.status === 200) {
-                        if(response.data) {
-                            window.location.href = `/chat.html?chatRoomSeq=${response.data.seq}`;
-                        }
-                    }
-                });
+    axios.post(`/chatRooms`, data).then((response) => {
+        if(response.status === 200) {
+            if(response.data) {
+                window.location.href = `/chat.html?chatRoomSeq=${response.data.seq}`;
             }
         }
-    }).catch(error => console.log(error));
+    });
     
 }
 

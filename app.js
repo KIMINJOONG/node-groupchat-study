@@ -61,6 +61,23 @@ app.get('/apiUrl', (req, res) => {
     return res.json({url: process.env.PRODUCTION ? process.env.REAL_API : process.env.DEV_API});
 });
 
+app.post('/chatRooms', (req, res) => {
+    const token = req.body.token;
+    const userSeqs = req.body.userSeqs;
+    const headers = {
+        'Authorization' : `Bearer ${token}`
+    };
+
+    axios.post(`${api}/chatRooms`, {userSeqs}, {headers}).then((response) => {
+        if(response.status === 200) {
+            if(response.data) {
+                io.emit('invitedFriend-createRoom', response.data);
+                return res.json(response.data);
+            }
+        }
+    });
+});
+
 app.post('/messages/fileUpload', upload.array('files'), async(req, res) => {
     try {
         const srcs = [];
