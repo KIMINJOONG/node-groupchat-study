@@ -1,7 +1,5 @@
 "use strict"
 
-const socket = io();
-
 const chatForm = document.getElementById('chat-form');
 const chatMessages = document.querySelector('.chat-messages');
 const roomName = document.getElementById('room-name');
@@ -26,24 +24,33 @@ const openModal = () => {
     const headers = {
         'Authorization' : `Bearer ${token}`
     };
-    axios.get('http://3.35.114.140/api/auth/me', {headers}).then((response) => {
-        axios.get('http://3.35.114.140/api/users', {headers}).then((usersResponse) => {
-            
-            if(usersResponse.status === 200) {
-                if(usersResponse.data) {
-                    for(let user of usersResponse.data) {
-                        const li = document.createElement('li');
-                        if(user.seq === response.data.current_user.seq) {
-                            // li.innerHTML = `<span>${user.name} (${user.email}) (나)</span>`;
-                        } else {
-                            li.innerHTML = `<span>${user.name} (${user.email})</span><input type="checkbox" class="checkboxInput" value=${user.seq}>`;
+    axios.get('/apiUrl').then((apiUrlResponse) => {
+        if(apiUrlResponse.status === 200) {
+            if(apiUrlResponse.data) {
+                const apiUrl = apiUrlResponse.data.url;
+                axios.get(`${apiUrl}/auth/me`, {headers}).then((response) => {
+                    axios.get(`${apiUrl}/users`, {headers}).then((usersResponse) => {
+                        
+                        if(usersResponse.status === 200) {
+                            if(usersResponse.data) {
+                                for(let user of usersResponse.data) {
+                                    const li = document.createElement('li');
+                                    if(user.seq === response.data.current_user.seq) {
+                                        // li.innerHTML = `<span>${user.name} (${user.email}) (나)</span>`;
+                                    } else {
+                                        li.innerHTML = `<span>${user.name} (${user.email})</span><input type="checkbox" class="checkboxInput" value=${user.seq}>`;
+                                    }
+                                    userList.appendChild(li);
+                                }
+                            }
                         }
-                        userList.appendChild(li);
-                    }
-                }
+                    });
+                });
+                
             }
-        });
-    });
+        }
+    }).catch(error => console.log(error));
+    
 
     
 
@@ -98,6 +105,7 @@ socket.on('message', message => {
 });
 
 socket.on('showUploadFiles', data => {
+    console.log('showUploadFiles', data);
     const div = document.createElement('div');
     div.classList.add('message');
     div.innerHTML = `

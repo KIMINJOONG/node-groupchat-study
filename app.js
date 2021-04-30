@@ -5,17 +5,24 @@ const path = require("path");
 const server = http.createServer(app);
 const socketIo = require('socket.io');
 const redisAdapter = require('socket.io-redis');
-const formatMessage = require('./utils/messages');
-const { userJoin, getCurrentUser, userLeave, getRoomUsers } = require('./utils/users');
 const multer = require('multer');
+const multerS3 = require('multer-s3');
+const aws = require('aws-sdk');
 const fs = require('fs');
 const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
 const { default: axios } = require('axios');
-require('dotenv').config()
+require('dotenv').config();
+
+aws.config.update({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region : 'ap-northeast-2'
+});
 
 const api = process.env.PRODUCTION ? process.env.REAL_API : process.env.DEV_API;
 // 파일업로드를 위한 multer 설정
+const s3 = new aws.S3();
 const upload = multer({
     storage: multer.diskStorage({
         destination(req, file, done) {
@@ -27,6 +34,18 @@ const upload = multer({
             done(null, fileName + new Date().valueOf() + '.jpg'); // 파일명이 같더라도 업로드하는 시간을 넣어줌으로써 기존파일에 덮어씌우는것을 방지
         }
     }),
+    // storage: multerS3({
+    //     s3,
+    //     bucket: 'cybertoreal-test',
+    //     destination(req, file, done) {
+    //         done(null, 'temp');
+    //     },  
+    //     filename(req, file, done) {
+    //         const ext = path.extname(file.originalname);
+    //         const fileName = uuidv4(10);
+    //         done(null, fileName + new Date().valueOf() + '.jpg'); // 파일명이 같더라도 업로드하는 시간을 넣어줌으로써 기존파일에 덮어씌우는것을 방지
+    //     }
+    // }),
     limits: { fileSize: 20 * 1024 * 1024 }, //용량을 제한 현재 최대 20mb 해커들이 서버를 공격못하게 제한해주는게 좋다
 });
 
@@ -37,11 +56,16 @@ app.use(express.urlencoded({extended: false}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'src')));
 app.use('/uploads', express.static('uploads'));
+
+app.get('/apiUrl', (req, res) => {
+    return res.json({url: process.env.PRODUCTION ? process.env.REAL_API : process.env.DEV_API});
+});
+
 app.post('/messages/fileUpload', upload.array('files'), async(req, res) => {
     try {
         const srcs = [];
         for (let file of req.files) {
-            const filename = await imageResize(file);
+            const filename = await imageResize(file, req.body.chatRoomSeq);
             srcs.push(filename);
         }
         const headers = {
@@ -54,32 +78,42 @@ app.post('/messages/fileUpload', upload.array('files'), async(req, res) => {
         axios.post(`${api}/messages/${req.body.chatRoomSeq}`, data, {headers}).then((response) => {
             return res.json(response.data);
         }).catch((error) => console.log('error : ', error));
-
-        
     }catch(error) {
         console.log(error);
     }
 });
 
-function imageResize(file) {
+function imageResize(file, chatRoomSeq) {
     return new Promise((resolve, reject) => {
         sharp(file.path)
             .resize({width: 800})
             .withMetadata()
             .toFormat('jpg')
-            .toFile(`uploads/${file.filename}`, (err, info) => {
-                if(err) {
-                    throw err
-                } 
-                
-                fs.unlink(`temp/${file.filename}`, (error) => {
-                    if(error) {
-                        throw error;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
-                    } 
-                });
-                return resolve(`uploads/${file.filename}`);
-                
+            // .toFile(`uploads/${file.filename}`, (err, info) => {
+            //     if(err) {
+            //         throw err
+            //     } 
+            // })
+            .toBuffer(function(err, data) {
+                s3.putObject({
+                    Bucket: 'cybertoreal-test',
+                    Key: `chatRooms/${chatRoomSeq}/messages/images/${file.filename}`,
+                    ACL: 'public-read',
+                    Body: data
+                }).send(err => {
+                    if(err) {
+                        console.log(err);
+                    } else {
+                        fs.unlink(`temp/${file.filename}`, (error) => {
+                            if(error) {
+                                throw error;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+                            } 
+                        });            
+                        return resolve(`chatRooms/${chatRoomSeq}/messages/images/${file.filename}`);
+                    }
+                })
             });
+            // });
     });
 }
 
@@ -90,8 +124,7 @@ io.on('connection', socket => {
         socket.token = token;
         socket.chatRoomSeq = chatRoomSeq;
         axios.get(`${api}/chatRooms/${chatRoomSeq}/getUsers`).then((response) => {
-            console.log(typeof chatRoomSeq);
-            socket.join("19");
+            socket.join(chatRoomSeq);
             if(response.status === 200) {
                 if(response.data) {
                     const headers = {
@@ -125,7 +158,7 @@ io.on('connection', socket => {
         };
         axios.post(`${api}/messages/${chatRoomSeq}`, {message}, {headers}).then((response) => {
             if(response.status === 200) {
-                io.to("19").emit('message', response.data);
+                io.to(chatRoomSeq).emit('message', response.data);
             }
         }).catch(error => console.log(error));
     });
@@ -158,6 +191,7 @@ io.on('connection', socket => {
                 if(response.status === 200) {
                     if(response.data) {
                         io.to(chatRoomSeq).emit('invitedFriends',response.data);
+                        io.emit('invitedFriend-createRoom', response.data);
                     }
                 }
                 
