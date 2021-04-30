@@ -104,7 +104,7 @@ function createChatRoom(userSeq) {
     axios.post(`/chatRooms`, data).then((response) => {
         if(response.status === 200) {
             if(response.data) {
-                window.location.href = `/chat.html?chatRoomSeq=${response.data.seq}`;
+                window.location.href = `/chat.html?chatRoomSeq=${response.data.invitedRoomInfo.seq}`;
             }
         }
     });
