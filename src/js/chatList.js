@@ -33,7 +33,7 @@ window.onload = function() {
                                         if(chatRoom.users.length == 1) {
                                             li.innerHTML = `
                                             <span id="title_${chatRoom.seq}">${chatRoom.title ? chatRoom.title : chatRoom.users[0].name}</span>
-                                            <span id="chatRoomCount_${chatRoom.seq}">${chatRoom.messages.length}</span>
+                                            <span id="chatRoomCount_${chatRoom.seq}">${chatRoom.notReadCount}</span>
                                             <button onclick="enterChatRoom('${chatRoom.seq}')">대화하기</button>
                                             <p id="chatRoomLastMessage_${chatRoom.messages[0].seq}">
                                             ${chatRoom.messages[0].message}
