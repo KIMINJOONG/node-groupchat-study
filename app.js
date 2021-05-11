@@ -176,9 +176,23 @@ io.on('connection', socket => {
         axios.post(`${api}/messages/${chatRoomSeq}`, {message}, {headers}).then((response) => {
             if(response.status === 200) {
                 io.to(chatRoomSeq).emit('message', response.data);
+                io.emit('messageForChatList', response.data);
             }
         }).catch(error => console.log(error));
     });
+
+    socket.on('getChatRoomRequest', ({chatRoomSeq, token}) => {
+        const headers = {
+            'Authorization' : `Bearer ${token}`
+        };
+        axios.get(`${api}/chatRooms/${chatRoomSeq}`, {headers}).then((response) => {
+            if(response.status === 200) {
+                if(response.data) {
+                    io.emit('getChatRoomResponse', response.data);
+                }
+            }
+        });
+    })
 
     socket.on('disconnect', () => {
         if(socket.token) {
@@ -208,14 +222,30 @@ io.on('connection', socket => {
                 if(response.status === 200) {
                     if(response.data) {
                         io.to(chatRoomSeq).emit('invitedFriends',response.data);
-                        io.emit('invitedFriend-createRoom', response.data);
+                        // io.emit('invitedFriend-createRoom', response.data);
                     }
                 }
                 
             }).catch(error => console.log(error));
         }
         
-    })
+    });
+
+    socket.on('chatRoom_message_read_update_request', function(data) {
+        const {chatRoomSeq} = data;
+        const headers = {
+            'Authorization' : `Bearer ${socket.token}`
+        };
+        axios.get(`${api}/chatRooms/${chatRoomSeq}/getMessages?isChatRoomMessageReadUpdate=1`, {headers}).then((getMessagesResponse) => {
+            if(getMessagesResponse.status === 200) {
+                if(getMessagesResponse.data) {
+                    io.to(chatRoomSeq).emit('chatRoom_message_read_update', getMessagesResponse.data);
+                    axios.post(`${api}/chatRooms/${chatRoomSeq}/connect`, {}, {headers}).then((response) => {
+                    });
+                }
+            }
+        }).catch((error) => console.log(error));
+    });
         
 });
 

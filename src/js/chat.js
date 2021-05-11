@@ -86,11 +86,26 @@ openButton.addEventListener("click", openModal);
 
 socket.emit('joinRoom', {chatRoomSeq, token: localStorage.getItem('token')});
 
-socket.on('getMessagesHistory', ({ data, chatRoomSeq }) => {
+socket.on('getMessagesHistory', ({ data }) => {
     for(let message of data.messages.reverse()) {
-        outputFromServerMessage(message);
+        outputFromServerMessage(message, data.users);
     }
     chatMessages.scrollTop = chatMessages.scrollHeight;
+    socket.emit('chatRoom_message_read_update_request', {token: localStorage.getItem('token'), chatRoomSeq});
+});
+
+socket.on('chatRoom_message_read_update', data => {
+    // 채팅방 실시간 읽음 처리 숫자 제거
+    const messageContents = document.querySelectorAll(".messageContent > span");
+    for(let messageContent of messageContents) {
+        for(let message of data.messages) {
+            if(messageContent.dataset.messageseq && parseInt(messageContent.dataset.messageseq, 10) === message.seq ) {
+                messageContent.innerText = data.users.length - message.readUsers.length;
+            }
+        }
+    } 
+
+
 });
 
 socket.on('roomUsers', ({ chatRoomSeq, users }) => {
@@ -99,7 +114,7 @@ socket.on('roomUsers', ({ chatRoomSeq, users }) => {
 });
 
 socket.on('message', message => {
-    outputMessage(message);
+    outputMessage(message.message, message.userChatRoomsCount);
 
     chatMessages.scrollTop = chatMessages.scrollHeight;
 });
@@ -140,7 +155,7 @@ chatForm.addEventListener('submit', (e) => {
     e.target.elements.msg.focus();
 });
 
-function outputMessage(message) {
+function outputMessage(message, userChatRoomsCount = -1) {
     let time = '';
     if(message.regdate) {
         time = convert12H(message.regdate);
@@ -149,18 +164,18 @@ function outputMessage(message) {
     div.classList.add('message');
     div.innerHTML = `
         <p class="meta">${message.user ? message.user.name : message.name} ${time && (`<span> ${time}</span>`)}</p>
-        <p class="text">${message.message}</p>
+        <p class="text messageContent" style="display: flex; justify-content: space-between">${message.message} ${userChatRoomsCount !== -1 && (`<span data-messageSeq=${message.seq}>${userChatRoomsCount - message.readUsers.length}</span>`)}</p>
     `;
     document.querySelector('.chat-messages').appendChild(div);
 }
 
-function outputFromServerMessage(message) {
+function outputFromServerMessage(message, users) {
     let time = convert12H(message.regdate);
     const div = document.createElement('div');
     div.classList.add('message');
     let innerHTML = `
         <p class="meta">${message.user.name} <span>${time}</span></p>
-        <p class="text">${message.message}</p>
+        <p class="text messageContent" style="display: flex; justify-content: space-between">${message.message} <span data-messageSeq=${message.seq}>${users.length - message.readUsers.length}</span></p>
     `;
     
     if(message.message_files && message.message_files.length > 0) {
