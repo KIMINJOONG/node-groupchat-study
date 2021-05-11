@@ -35,7 +35,7 @@ window.onload = function() {
                                             <span id="title_${chatRoom.seq}">${chatRoom.title ? chatRoom.title : chatRoom.users[0].name}</span>
                                             <span id="chatRoomCount_${chatRoom.seq}">${chatRoom.notReadCount}</span>
                                             <button onclick="enterChatRoom('${chatRoom.seq}')">대화하기</button>
-                                            <p id="chatRoomLastMessage_${chatRoom.messages[0].seq}">
+                                            <p id="chatRoomLastMessage_${chatRoom.seq}">
                                             ${chatRoom.messages[0].message}
                                             </p>
                                         `;
@@ -83,13 +83,17 @@ window.onload = function() {
 
 
 socket.on('messageForChatList', data => {
+    console.log(data);
     const li = document.getElementById(`chatRoom_${data.message.chatRoom_seq}`);
     if(li) {
         const span = document.getElementById(`chatRoomCount_${data.message.chatRoom_seq}`);
         const beforeCount = span.innerText;
         span.innerText = parseInt(beforeCount, 10) + 1;
         const lastMessagePtag = document.getElementById(`chatRoomLastMessage_${data.message.chatRoom_seq}`);
-        lastMessagePtag.innerHTML = data.message.message;
+        if(lastMessagePtag) {
+            lastMessagePtag.innerHTML = data.message.message;
+        }
+        
         
     } else {
         socket.emit('getChatRoomRequest', {token: localStorage.getItem('token'), chatRoomSeq: data.message.chatRoom_seq});
@@ -117,16 +121,17 @@ socket.on('getChatRoomResponse', data => {
                                 <span id="title_${data.seq}">${data.title ? data.title : data.users[0].name}</span>
                                 <span id="chatRoomCount_${data.seq}">${data.messages.length}</span>
                                 <button onclick="enterChatRoom('${data.seq}')">대화하기</button>
-                                <p id="chatRoomLastMessage_${data.messages[0].seq}">
+                                <p id="chatRoomLastMessage_${data.seq}">
                                 ${data.messages[0].message}
                                 </p>
                             `;
                             } else {
+                                
                                 li.innerHTML = `
                                 <span id="title_${data.seq}">${data.title ? data.title : user.name + "외 " + data.users.length + "명"}</span>
                                 <span id="chatRoomCount_${data.seq}">${data.messages.length}</span>
                                 <button onclick="enterChatRoom('${data.seq}')">대화하기</button>
-                                <p id="chatRoomLastMessage_${data.messages[0].seq}">
+                                <p id="chatRoomLastMessage_${data.seq}">
                                 ${data.messages[0].message}
                                 </p>
                             `;
