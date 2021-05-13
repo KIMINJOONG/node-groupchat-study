@@ -222,7 +222,14 @@ io.on('connection', socket => {
                 if(response.status === 200) {
                     if(response.data) {
                         io.to(chatRoomSeq).emit('invitedFriends',response.data);
-                        // io.emit('invitedFriend-createRoom', response.data);
+
+                        axios.get(`${api}/chatRooms/${chatRoomSeq}`, {headers}).then((response) => {
+                            if(response.status === 200) {
+                                if(response.data) {
+                                    io.emit('invitedFriend-createRoom', response.data);
+                                }
+                            }
+                        });
                     }
                 }
                 
