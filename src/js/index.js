@@ -1,30 +1,29 @@
+const loginForm = document.getElementById('loginForm');
 
-function login() {
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
+loginForm.addEventListener('submit', e => {
+  e.preventDefault();
+  login();
+});
+async function login() {
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
 
-    const data = {
-        email: emailInput.value,
-        password: passwordInput.value,
-    };
-    axios.get('/apiUrl').then((apiUrlResponse) => {
-        if(apiUrlResponse.status === 200) {
-            if(apiUrlResponse.data) {
-                const apiUrl = apiUrlResponse.data.url;
-                
-                axios.post(`${apiUrl}/auth/login`, data).then((response) => {
-                    if(response.status === 200) {
-                        if(response.data.access_token) {
-                            localStorage.setItem('token', response.data.access_token);
-                            window.location.href='/chatList.html';
-                        }
-                        
-                    }
-                    
-                });
-            }
+  const data = {
+    email: emailInput.value,
+    password: passwordInput.value,
+  };
+  const apiUrlResponse = await axios.get('/apiUrl');
+  if (apiUrlResponse.status === 200) {
+    if (apiUrlResponse.data) {
+      apiUrl = apiUrlResponse.data.url;
+
+      const loginResponse = await axios.post(`${apiUrl}/auth/login`, data);
+      if (loginResponse.status === 200) {
+        if (loginResponse.data.access_token) {
+          localStorage.setItem('token', loginResponse.data.access_token);
+          window.location.href = '/chatList.html';
         }
-    }).catch(error => console.log(error));
-    
-
+      }
+    }
+  }
 }

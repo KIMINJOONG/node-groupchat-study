@@ -1,57 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta http-equiv="X-UA-Compatible" content="ie=edge" />
-		<link
-			rel="stylesheet"
-			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
-			integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk="
-			crossorigin="anonymous"
-		/>
-		<link rel="stylesheet" href="css/style.css" />
-		<title>ChatCord App</title>
-	</head>
-	<body>
-		<div class="join-container">
-			<header class="join-header">
-				<h1><i class="fas fa-smile"></i> ChatCord</h1>
-			</header>
-			<main class="join-main">
-				<div class="form-control">
-					<label for="username">접속자</label>
-					<input
-						type="text"
-						name="userName"
-						id="userName"
-						value=""
-						disabled
-						placeholder="Enter username..."
-						required
-					/>
-					<input
-						id="userSeq"
-						type="text"
-						hidden
-						value=""
-					/>
-				</div>
-				<div class="form-control">
-					<label for="roomList">채팅방 리스트</label>
-					<ul id="roomList" name="roomList" style="width: 100%">
-					</ul>
-				</div>
-				<div class="form-control">
-					<label for="room">리스트</label>
-					<ul id="userList" name="room" style="width: 100%">
-					</ul>
-				</div>
-			</main>
-		</div>
-		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-		<script src="/socket.io/socket.io.js"></script>
-		<script type="text/javascript" src="js/socket.js"></script>
-        <script type="text/javascript" src="js/chatList.js"></script>
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css"
+      integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk="
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/kakao.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css"
+    />
+    <title>ChatCord App</title>
+  </head>
+  <body>
+    <div class="main_container">
+      <header class="header">
+        <h2>친구</h2>
+        <div class="header_icons">
+          <i class="fas fa-search"></i>
+          <i class="fas fa-user-plus"></i>
+          <i class="fas fa-music"></i>
+          <i class="fas fa-cog"></i>
+        </div>
+      </header>
+      <main class="main tab_main active" id="frineds_tab">
+        <div class="main_list">
+          <div class="me">
+            <img
+              class="profile_image"
+              src="https://st3.depositphotos.com/4111759/13425/v/600/depositphotos_134255710-stock-illustration-avatar-vector-male-profile-gray.jpg"
+            />
+            <h4 id="myName">나</h4>
+          </div>
+        </div>
+        <div>
+          <div class="main_list_header">
+            <span id="usersCount"></span>
+          </div>
+          <ul class="friend_list" id="friendList"></ul>
+        </div>
+      </main>
+      <main class="main tab_main" id="chatRooms_tab">
+        <ul class="chatRoom_list" id="chatRoomList">
+        </ul>
+        </div>
+      </main>
+      <footer class="footer">
+        <ul class="tab_menu">
+          <li data-tabIndex=0 onclick="tabChange(0);">
+            <i class="far fa-user fa-lg"></i>
+          </li>
+          <li data-tabIndex=1 onclick="tabChange(1);">
+            <i class="far fa-comment fa-lg"></i>
+          </li>
+        </ul>
+      </footer>
+    </div>
+    <!-- <div class="join-container">
+      <header class="join-header">
+        <h1><i class="fas fa-smile"></i> ChatCord</h1>
+      </header>
+      <main class="join-main">
+        <div class="form-control">
+          <label for="username">접속자</label>
+          <input
+            type="text"
+            name="userName"
+            id="userName"
+            value=""
+            disabled
+            placeholder="Enter username..."
+            required
+          />
+          <input id="userSeq" type="text" hidden value="" />
+        </div>
+        <div class="form-control">
+          <label for="roomList">채팅방 리스트</label>
+          <ul id="roomList" name="roomList" style="width: 100%"></ul>
+        </div>
+        <div class="form-control">
+          <label for="room">리스트</label>
+          <button onclick="enterGroupChatRoom();">그룹채팅</button>
+          <ul id="userList" name="room" style="width: 100%"></ul>
+        </div>
+      </main>
+    </div> -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="js/socket.js"></script>
+    <script type="text/javascript" src="js/chatList.js"></script>
+  </body>
 </html>
